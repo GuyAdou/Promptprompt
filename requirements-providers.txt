@@ -1,0 +1,9 @@
+# Optional SDKs for the alternate optimizer backends (api_client.py).
+# Groq is the default and only needs requirements.txt.
+#
+#   pip install -r requirements-providers.txt   # installs all three
+#   pip install anthropic                       # or just the one you want
+#
+google-generativeai   # enables the Gemini backend (GEMINI_API_KEY)
+anthropic              # enables the Claude backend (ANTHROPIC_API_KEY)
+openai                 # enables the GPT backend (OPENAI_API_KEY)

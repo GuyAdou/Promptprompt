@@ -9,12 +9,13 @@
 ```
 .
 ├── main.py                   # Entry point — wires all components and runs setup
-├── api_client.py             # API connector (Groq active; Gemini/OpenAI/Anthropic supported)
+├── api_client.py             # Provider layer — Groq/Gemini/Claude/GPT connectors behind one interface
 ├── cli.py                    # Rich terminal UI — input, display, and interaction loops
 ├── optimizer.py              # Core logic — generates clarifying questions and optimizes prompts
 ├── weblauncher.py            # Automation — opens browser or Claude Code with the final prompt
 ├── storage.py                # Saves each session as a timestamped .txt file
 ├── requirements.txt          # Core Python dependencies (CLI)
+├── requirements-providers.txt # Optional SDKs for the Gemini/Claude/GPT backends
 ├── requirements-eval.txt     # Extra dependencies for tests2.py/tests3.py (evaluation only)
 ├── Open Source Tools.md      # Survey of evaluation tools used in the project
 │
@@ -62,10 +63,14 @@ python -m venv .venv
 source .venv/bin/activate      # macOS/Linux
 .venv\Scripts\activate         # Windows
 
-# 3. Install dependencies (core CLI only)
+# 3. Install dependencies (core CLI only — enough to use Groq)
 pip install -r requirements.txt
 
-# 3b. (Optional) Install extra dependencies to run the evaluation scripts
+# 3b. (Optional) Install the SDK(s) for other optimizer backends you want
+#     (Gemini, Claude, GPT) — see "Configuration" below.
+pip install -r requirements-providers.txt
+
+# 3c. (Optional) Install extra dependencies to run the evaluation scripts
 #     (tests2.py, tests3.py) — these pull in torch/transformers and are not
 #     needed to use the CLI itself.
 pip install -r requirements-eval.txt
@@ -75,14 +80,29 @@ pip install -r requirements-eval.txt
 
 ## Configuration
 
-No manual setup required. On first run, the program detects missing API keys and prompts you interactively:
+No manual setup required. On first run, the program detects whether any provider's API key is present and, if not, prompts you interactively:
 
 ```
 First Time Setup
-No API keys detected. Please configure them now.
+No API keys detected. Please configure one now.
+
+Which AI provider would you like to use to power PromptPrompt?
+  1. Groq (fast & free)
+  2. Google Gemini
+  3. Anthropic Claude
+  4. OpenAI GPT
 ```
 
-It will ask for your **Groq API Key** (recommended — fast and free) and save it to a local `.env` file. Get a key at [console.groq.com/keys](https://console.groq.com/keys).
+Pick one and paste its key — it's saved to a local `.env` file. **Groq is recommended** (fast and free): get a key at [console.groq.com/keys](https://console.groq.com/keys).
+
+| Provider | .env variable | Needs |
+|----------|----------------|-------|
+| Groq | `GROQ_API_KEY` | `requirements.txt` (installed by default) |
+| Google Gemini | `GEMINI_API_KEY` | `pip install google-generativeai` |
+| Anthropic Claude | `ANTHROPIC_API_KEY` | `pip install anthropic` |
+| OpenAI GPT | `OPENAI_API_KEY` | `pip install openai` |
+
+You can configure more than one — just add extra `PROVIDER_API_KEY=...` lines to `.env` (or re-run setup by deleting it). If more than one provider is configured, PromptPrompt asks which one should power that session; each optional SDK above is only required for the provider(s) you actually enable (`requirements-providers.txt` installs all three at once).
 
 The `.env` file is listed in `.gitignore` and will never be committed.
 
@@ -127,7 +147,7 @@ Key findings:
 
 ## Supported LLM Targets
 
-The optimizer engine runs on **Groq** (default). The web launcher can open any of these targets with the final prompt:
+The optimizer engine runs on **Groq, Gemini, Claude, or GPT** — whichever provider(s) you configure (see Configuration above). The web launcher can open any of these targets with the final prompt:
 
 - [ChatGPT](https://chatgpt.com) *(default)*
 - [Claude](https://claude.ai)

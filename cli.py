@@ -21,29 +21,6 @@ class CLI:
         self.launcher = launcher
         self.console.print("[bold blue] CLI Initialized![/bold blue]")
 
-    def get_ai_choice(self):
-        #Ask user which AI tool they want to use
-        self.console.print("\n[bold cyan]Which AI tool would you like to use?[/bold cyan]")
-        self.console.print("  1. Claude")
-        self.console.print("  2. Gemini")
-        self.console.print("  3. GPT-4")
-        self.console.print("  4. Codex")
-
-        choice = input("\nEnter your choice (1-4): ").strip()
-
-        model_map = {
-            "1": "claude",
-            "2": "gemini",
-            "3": "gpt-4",
-            "4": "codex"
-        }
-
-        while choice not in model_map:
-            self.console.print("[red]Please enter 1, 2, 3, or 4[/red]")
-            choice = input("Enter your choice (1-4): ").strip()
-
-        return model_map[choice]
-
     def run(self, draft_prompt=None, claude_code_path=None):
         # Main method - this is what starts everything
         self.console.print("[bold magenta] Welcome to PromptPrompt! [/bold magenta]")

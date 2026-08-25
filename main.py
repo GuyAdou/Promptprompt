@@ -1,11 +1,26 @@
 import sys
 import os
+
+# Windows consoles commonly default to a legacy code page (e.g. cp1252) that
+# can't encode the Unicode symbols (checkmarks, arrows, bullets) this CLI
+# prints. Force UTF-8 on the standard streams so those never crash with
+# UnicodeEncodeError. Must happen before any other module in this app prints
+# or reads input.
+for _stream in (sys.stdout, sys.stderr, sys.stdin):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        # reconfigure() is Python 3.7+ and only works on real text streams;
+        # silently skip if the stream doesn't support it (e.g. some test
+        # harnesses replace sys.stdout with a plain io.StringIO).
+        pass
+
 from getpass import getpass
 from dotenv import load_dotenv
 import shutil
 
 # Import your modules
-from api_client import ModelConnector
+import api_client
 # from user_auth import UserAuth
 from cli import CLI
 from optimizer import PromptOptimizer
@@ -18,35 +33,60 @@ ENV_PATH = ".env"
 
 def setup_api_keys():
     """
-    Check if API keys exist in the environment variables.
-    If not, prompt the user to input them and save to the .env file.
+    Check if any supported provider's API key exists in the environment.
+    If not, ask the user which provider they want to use and save its key
+    to the .env file.
     """
     # Force reload environment variables (in case they were just updated)
     load_dotenv(ENV_PATH, override=True)
 
-    # Check if core keys exist (Using Groq as the example since it's mandatory/default)
-    groq_key = os.getenv("GROQ_API_KEY")
-
-    if groq_key :
+    if api_client.available_providers():
         return
 
     print("\n" + "="*60)
     print("   First Time Setup   ")
-    print("   No API keys detected. Please configure them now.")
+    print("   No API keys detected. Please configure one now.")
     print("   (Keys will be securely saved to the local .env file)")
     print("="*60 + "\n")
 
-    # 1. Get Groq Key (Mandatory)
-    print("Please enter your Groq API Key (Recommended, Fast & Free):")
-    print("Get key here: https://console.groq.com/keys")
-    new_groq = getpass("Groq Key (Input hidden): ").strip()
-    
-    if new_groq:
+    print("Which AI provider would you like to use to power PromptPrompt?")
+    options = list(api_client.PROVIDER_ENV_KEYS.items())
+    for i, (name, _) in enumerate(options, 1):
+        print(f"  {i}. {api_client.PROVIDER_LABELS[name]}")
+    print("\n(Groq is recommended: fast and free. Get a key at https://console.groq.com/keys)")
+
+    choice = input(f"\nEnter your choice (1-{len(options)}) [1]: ").strip() or "1"
+    while not choice.isdigit() or not (1 <= int(choice) <= len(options)):
+        choice = input(f"Please enter a number between 1 and {len(options)}: ").strip()
+
+    provider, env_var = options[int(choice) - 1]
+    new_key = getpass(f"\n{api_client.PROVIDER_LABELS[provider]} key ({env_var}, input hidden): ").strip()
+
+    if new_key:
         # Append to .env file
         with open(ENV_PATH, "a") as f:
-            f.write(f"\nGROQ_API_KEY={new_groq}")
-        print("✓ Groq Key saved.")
+            f.write(f"\n{env_var}={new_key}")
+        print(f"✓ {env_var} saved.")
     load_dotenv(ENV_PATH, override=True)
+
+
+def choose_provider(providers):
+    """
+    If more than one provider is configured, ask the user which one should
+    power this session. Returns a single provider name from `providers`.
+    """
+    if len(providers) == 1:
+        return providers[0]
+
+    print("\nMultiple AI providers are configured. Which should power this session?")
+    for i, name in enumerate(providers, 1):
+        print(f"  {i}. {api_client.PROVIDER_LABELS[name]}")
+
+    choice = input(f"\nEnter your choice (1-{len(providers)}) [1]: ").strip() or "1"
+    while not choice.isdigit() or not (1 <= int(choice) <= len(providers)):
+        choice = input(f"Please enter a number between 1 and {len(providers)}: ").strip()
+
+    return providers[int(choice) - 1]
 
 def main():
     print("\n" + "*"*50)
@@ -59,16 +99,20 @@ def main():
     # --- STEP 1: Initialize API Connection ---
     print("[System] Initializing AI Models...")
     try:
-        # This re-reads the environment variables
-        api = ModelConnector()
-        
-        # Verify connection success
-        if not api.groq_client and not api.gemini_available:
+        # Re-read the environment variables and see which provider(s) are configured
+        providers = api_client.available_providers()
+        if not providers:
             print("[Error] No valid API keys found.")
             print("Please check the .env file or delete it to re-run setup.")
             sys.exit(1)
-            
-        print("[System] AI Models Connected.")
+
+        selected_provider = choose_provider(providers)
+        api = api_client.get_connector(selected_provider)
+
+        print(f"[System] AI Models Connected. Using: {api_client.PROVIDER_LABELS[selected_provider]}")
+    except ImportError as e:
+        print(f"[Critical Error] {e}")
+        sys.exit(1)
     except Exception as e:
         print(f"[Critical Error] Failed to connect to AI models: {e}")
         sys.exit(1)
