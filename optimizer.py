@@ -56,10 +56,12 @@ class PromptOptimizer:
         """
         task_instruction = self._load_prompt("task_generate_questions.txt")
 
-        # Build message: System prompt + instructions
-        message = f"{self.system_prompt}\n\n{task_instruction}".format(
-            draft_prompt=draft_prompt
-        )
+        # Build message: System prompt + instructions.
+        # Only substitute the placeholder in task_instruction (via .replace,
+        # not .format) so stray "{"/"}" elsewhere in the prompt templates
+        # (e.g. JSON/code examples) can't raise a KeyError/ValueError.
+        task_instruction = task_instruction.replace("{draft_prompt}", draft_prompt)
+        message = f"{self.system_prompt}\n\n{task_instruction}"
 
         # First API call
         response = self.api_client.send_message(message)

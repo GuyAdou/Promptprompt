@@ -1,0 +1,16 @@
+# Extra dependencies needed only to run the evaluation/plotting scripts
+# (tests2.py, tests3.py). Not required to use the PromptPrompt CLI itself.
+#
+#   pip install -r requirements.txt -r requirements-eval.txt
+bert_score==0.3.13
+matplotlib==3.10.7
+nltk
+pandas==2.3.3
+protobuf==6.33.1
+rouge_score==0.1.2
+scikit-learn
+sentence_transformers==5.1.2
+textstat==0.7.11
+tiktoken
+torch>=2.5.1
+transformers==4.46.2

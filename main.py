@@ -102,7 +102,7 @@ def main():
                 storage.save_config(config)
             # If not in PATH either, CLI will prompt user later
 
-    # --- STEP 4: Launch the CLI (View) ---/
+    # --- STEP 4: Launch the CLI (View) ---
     print("[System] Launching User Interface...\n")
     try:
         # Pass the optimizer to the CLI
@@ -121,7 +121,7 @@ def main():
     except KeyboardInterrupt:
         print("\n[System] Program interrupted by user.")
     except Exception as e:
-        print(f"\n[Error] An unexpe1cted error occurred in the CLI: {e}")
+        print(f"\n[Error] An unexpected error occurred in the CLI: {e}")
 
 if __name__ == "__main__":
     main()

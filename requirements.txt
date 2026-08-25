@@ -1,18 +1,8 @@
-bert_score==0.3.13
-google-generativeai
+# Core runtime dependencies for `python main.py` (the CLI itself).
+# Evaluation-only dependencies (torch, transformers, sentence-transformers,
+# bert_score, etc. used by tests2.py/tests3.py) live in requirements-eval.txt
+# so a user who just wants to run the CLI doesn't have to download them.
 groq==0.37.0
-matplotlib==3.10.7
-nltk
-pandas==2.3.3
-protobuf==6.33.1
-pyautogui==0.9.54
-pyperclip==1.11.0
 python-dotenv==1.2.1
+pyperclip==1.11.0
 rich==14.2.0
-rouge_score==0.1.2
-scikit-learn
-sentence_transformers==5.1.2
-textstat==0.7.11
-tiktoken
-torch>=2.5.1
-transformers==4.46.2

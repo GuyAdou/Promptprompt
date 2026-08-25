@@ -1,26 +1,30 @@
-# --- 安全隐私 (绝对不能传) ---
+# --- Secrets (never commit) ---
 .env
 .env.local
 
-# --- 数据库文件 ---
+# --- Database files ---
 *.db
 *.sqlite3
 users.db
 
-# --- Python 缓存和编译文件 (垃圾文件) ---
+# --- Python cache and compiled files (junk) ---
 __pycache__/
 *.py[cod]
 *$py.class
 
-# --- 虚拟环境 ---
+# --- Virtual environments ---
 .venv/
 venv/
 env/
 
-# --- IDE 配置 (VS Code 的个人设置) ---
+# --- IDE settings (personal editor config) ---
 .vscode/
 .idea/
 
-# --- 操作系统生成的垃圾文件 ---
+# --- OS-generated junk files ---
 .DS_Store
 Thumbs.db
+
+# --- Local machine config / session logs (contain local paths and user input, should not be committed) ---
+launcher_config.json
+prompts/optimized prompts/

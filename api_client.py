@@ -17,6 +17,11 @@ class ModelConnector:
             print("Warning: GROQ_API_KEY not found.")
             self.groq_client = None
 
+        # Gemini/OpenAI/Anthropic are not wired up yet; kept as an explicit
+        # flag (rather than an attribute that doesn't exist) so callers like
+        # main.py can safely check for a fallback backend without crashing.
+        self.gemini_available = False
+
 
     # Using Groq to send message
     def send_message(self, message, history=None):

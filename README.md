@@ -14,7 +14,8 @@
 ├── optimizer.py              # Core logic — generates clarifying questions and optimizes prompts
 ├── weblauncher.py            # Automation — opens browser or Claude Code with the final prompt
 ├── storage.py                # Saves each session as a timestamped .txt file
-├── requirements.txt          # Python dependencies
+├── requirements.txt          # Core Python dependencies (CLI)
+├── requirements-eval.txt     # Extra dependencies for tests2.py/tests3.py (evaluation only)
 ├── Open Source Tools.md      # Survey of evaluation tools used in the project
 │
 ├── prompts/                  # Prompt templates loaded at runtime
@@ -61,8 +62,13 @@ python -m venv .venv
 source .venv/bin/activate      # macOS/Linux
 .venv\Scripts\activate         # Windows
 
-# 3. Install dependencies
+# 3. Install dependencies (core CLI only)
 pip install -r requirements.txt
+
+# 3b. (Optional) Install extra dependencies to run the evaluation scripts
+#     (tests2.py, tests3.py) — these pull in torch/transformers and are not
+#     needed to use the CLI itself.
+pip install -r requirements-eval.txt
 ```
 
 ---
